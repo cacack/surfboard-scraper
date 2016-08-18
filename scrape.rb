@@ -123,4 +123,38 @@ temp[:id].each_index do |index|
 end
 
 
+page = agent.get( 'http://192.168.100.1/cmAddressData.htm' )
+
+temp = {}
+rows = page.search( '//center[1]/table/tbody/tr' )
+rows[1..-1].each do |row|
+	cols = row.xpath( './/td' )
+	key = case cols[0].text.split(/ \s/)[0]
+		when 'Serial Number' then 'sn'
+		when 'HFC MAC Address' then 'hfc_mac'
+		when 'Ethernet IP Address' then 'eth_ip'
+		when 'Ethernet MAC Address' then 'eth_mac'
+	end
+	cols[1..-1].each do |col|
+		value = col.text[0..-1]
+		value.strip!
+		if key =~ /mac/
+			value.gsub!( '-', ':' )
+		end
+		data[key.to_sym] = value
+	end
+end
+
+temp = {}
+data[:cpe] = []
+rows = page.search( '//center[2]/table/tbody/tr' )
+rows[1..-1].each do |row|
+	cols = row.xpath( './/td' )
+	data[:cpe].push({
+	  :mac => cols[1].text,
+	  :status => cols[2].text,
+	})
+end
+
+
 ap data
