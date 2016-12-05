@@ -2,6 +2,7 @@
 #
 
 require 'awesome_print'
+require 'json'
 require 'mechanize'
 
 data = {}
@@ -157,4 +158,29 @@ rows[1..-1].each do |row|
 end
 
 
-ap data
+## Logs
+page = agent.get( 'http://192.168.100.1/cmLogsData.htm' )
+
+data[:logs] = []
+rows = page.search( '//center[1]/table/tbody/tr' )
+keys = []
+headers = rows[0].xpath( './/th' )
+headers.each do |heading|
+	key = heading.text.split(/ \s/)[0].downcase
+	keys.push( key )
+end
+rows[1..-1].each do |row|
+	temp = {}
+	cols = row.xpath( './/td' )
+	cols.each_with_index do |col,index|
+		key = keys[index]
+		value = cols[index].text[0..-1]
+		value.strip!
+		temp[key.to_sym] = value
+	end
+	data[:logs].push( temp )
+end
+
+
+
+puts JSON.generate( data )
