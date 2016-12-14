@@ -22,6 +22,7 @@ GEM
     mini_portile2 (2.1.0)
     net-http-digest_auth (1.4)
     net-http-persistent (2.9.4)
+    net-ping (1.7.8)
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
       pkg-config (~> 1.1.7)
@@ -39,6 +40,7 @@ DEPENDENCIES
   awesome_print (~> 1.7)
   json (~> 2.0, >= 2.0.2)
   mechanize (~> 2.7, >= 2.7.4)
+  net-ping (~> 1.7, >= 1.7.7)
 
 BUNDLED WITH
    1.13.6
