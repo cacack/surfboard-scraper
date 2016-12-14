@@ -1,16 +1,56 @@
 #!/usr/bin/env ruby
-#
 
-require 'awesome_print'
-require 'json'
-require 'mechanize'
+require 'rubygems'
+require 'bundler/setup'
+Bundler.require(:default)
 
-data = {}
+
+cablemodem = '192.168.100.1'
+cablemodem_url = "http://#{cablemodem}"
+
+ph = Net::Ping::HTTP.new( cablemodem )
 agent = Mechanize.new
 
+failed = false
 
-page = agent.get( 'http://192.168.100.1/cmSignalData.htm' )
+trap( 'SIGINT' ) do
+	puts
+	exit!
+end
 
+options = {}
+previous_collect = {}
+while true
+if ph.ping
+	print '.'
+	previous_collect = collect_info( cablemodem_url )
+	unless options[:monitor]
+		puts JSON.generate( previous_collect )
+		exit
+	end
+	sleep 10.0
+else
+	failed = true
+	while failed
+		until ph.ping
+			print '!'
+			sleep 1.0
+		end
+		print 'x'
+		sleep 5.0
+		begin
+			page = agent.get( cablemodem_url )
+			failed = false
+		rescue
+		end
+	end
+end
+
+
+def collect_info( url )
+data = {}
+page = agent.get( "#{cablemodem_url}/cmSignalData.htm" )
+ap page
 temp = {}
 rows = page.search( '//center[1]/table/tbody/tr' )
 rows[1..-1].each do |row|
@@ -181,6 +221,3 @@ rows[1..-1].each do |row|
 	data[:logs].push( temp )
 end
 
-
-
-puts JSON.generate( data )
